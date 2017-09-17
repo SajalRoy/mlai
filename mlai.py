@@ -6,8 +6,12 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 from IPython.display import display, clear_output, HTML
+import os.path
 
-
+def write_figure(filename):
+    """Write figure in correct formating"""
+    plt.savefig(filename, transparent=True)
+    
 ##########          Week 1          ##########
 def hyperplane_coordinates(w, b, plot_limits):
     """Helper function for plotting the decision boundary of the perceptron."""
@@ -21,7 +25,7 @@ def hyperplane_coordinates(w, b, plot_limits):
         x0 = -(b + x1*w[1])/w[0]
     return x0, x1
 
-def init_perceptron_plot(f, ax, x_plus, x_minus, w, b, x_select):
+def init_perceptron_plot(f, ax, x_plus, x_minus, w, b, x_select, fontsize=20):
     """Initialise a plot for showing the perceptron decision boundary."""
 
     h = {}
@@ -255,7 +259,7 @@ def fourier(x, num_basis=4, data_limits=[-1., 1.], frequency=None):
             Phi[:, i:i+1] = np.cos(tau*frequency*x)
     return Phi
 
-def plot_basis(basis, x_min, x_max, fig, ax, loc, text, directory='./diagrams', fontsize=20):
+def plot_basis(basis, x_min, x_max, fig, ax, loc, text, directory='../diagrams', fontsize=20):
     """Plot examples of the basis vectors."""
     x = np.linspace(x_min, x_max, 100)[:, None]
 
@@ -271,17 +275,17 @@ def plot_basis(basis, x_min, x_max, fig, ax, loc, text, directory='./diagrams', 
     ax.set_xlabel('$x$', fontsize=fontsize)
     ax.set_ylabel('$\phi(x)$', fontsize=fontsize)
 
-    plt.savefig(directory + '/' + basis.__name__ + '_basis1.svg')
+    write_figure(os.path.join(directory,  basis.__name__ + '_basis1.svg'))
 
     ax.plot(x, Phi[:, 1], '-', color=[1, 0, 1], linewidth=3)
     ax.text(loc[1][0], loc[1][1], text[1], horizontalalignment='center', fontsize=fontsize)
 
-    plt.savefig(directory + '/' + basis.__name__ + '_basis2.svg')
+    write_figure(os.path.join(directory,  basis.__name__ + '_basis2.svg'))
 
     ax.plot(x, Phi[:, 2], '-', color=[0, 0, 1], linewidth=3)
     ax.text(loc[2][0], loc[2][1], text[2], horizontalalignment='center', fontsize=fontsize)
 
-    plt.savefig(directory + '/' + basis.__name__ + '_basis3.svg')
+    write_figure(os.path.join(directory,  basis.__name__ + '_basis3.svg'))
 
     w = np.random.normal(size=(3, 1))
     
@@ -301,14 +305,14 @@ def plot_basis(basis, x_min, x_max, fig, ax, loc, text, directory='./diagrams', 
     for i in range(w.shape[0]):
         t.append(ax.text(loc[i][0], loc[i][1], '$w_' + str(i) + ' = '+ str(w[i]) + '$', horizontalalignment='center', fontsize=fontsize))
 
-    plt.savefig(directory + '/' + basis.__name__ + '_function1.svg')
+    write_figure(os.path.join(directory,  basis.__name__ + '_function1.svg'))
 
     w = np.random.normal(size=(3, 1)) 
     f = np.dot(Phi,w) 
     a.set_ydata(f)
     for i in range(3):
         t[i].set_text('$w_' + str(i) + ' = '+ str(w[i]) + '$')
-    plt.savefig(directory + '/' + basis.__name__ + '_function2.svg')
+    write_figure(os.path.join(directory,  basis.__name__ + '_function2.svg'))
 
 
     w = np.random.normal(size=(3, 1)) 
@@ -316,11 +320,11 @@ def plot_basis(basis, x_min, x_max, fig, ax, loc, text, directory='./diagrams', 
     a.set_ydata(f)
     for i in range(3):
         t[i].set_text('$w_' + str(i) + ' = '+ str(w[i]) + '$')
-    plt.savefig(directory + '/' + basis.__name__ + '_function3.svg')
+    write_figure(os.path.join(directory,  basis.__name__ + '_function3.svg'))
 
 
     
-def plot_marathon_fit(model, data_limits, fig, ax, x_val=None, y_val=None, objective=None, directory='./diagrams', fontsize=20, objective_ylim=None, prefix='olympic', title=None):
+def plot_marathon_fit(model, data_limits, fig, ax, x_val=None, y_val=None, objective=None, directory='../diagrams', fontsize=20, objective_ylim=None, prefix='olympic', title=None):
     "Plot fit of the marathon data alongside error."
     ax[0].cla()
     ax[0].plot(model.X, model.y, 'o', color=[1, 0, 0], markersize=6, linewidth=3)
@@ -360,7 +364,7 @@ def plot_marathon_fit(model, data_limits, fig, ax, x_val=None, y_val=None, objec
             ax[1].set_title(title, fontsize=fontsize)
             
     file_name = prefix + '_' + model.__class__.__name__ + '_' + model.basis.__name__ + str(model.num_basis) + '.svg'
-    plt.savefig(directory + '/' +file_name)
+    write_figure(os.path.join(directory, file_name))
 
 ##########          Week 6           ##########
 
@@ -501,7 +505,6 @@ def load_pgm(filename, directory=None, byteorder='>'):
     import re
     import numpy
     if directory is not None:
-        import os.path
         filename=os.path.join(directory, filename)
     with open(filename, 'rb') as f:
         buffer = f.read()
@@ -650,3 +653,7 @@ def exponentiated_quadratic(x, x_prime, variance=1., lengthscale=1.):
     squared_distance = ((x-x_prime)**2).sum()
     return variance*np.exp((-0.5*squared_distance)/lengthscale**2)        
 
+
+def polynomial_cov(x, x_prime, variance=1., degree=2., w=1., b=1.):
+    "Polynomial covariance function."
+    return variance*(np.dot(x, x_prime)*w + b)**degree
